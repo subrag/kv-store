@@ -2,6 +2,8 @@ package core
 
 import (
 	"errors"
+	"fmt"
+	"reflect"
 )
 
 // To communicate with the Redis server, Redis clients use a protocol
@@ -101,4 +103,17 @@ func readArray(data []byte) (interface{}, int, error) {
 		pos += delta
 	}
 	return elems, pos, nil
+}
+
+func Encode(v interface{}) string {
+	switch reflect.TypeOf(v).Kind() {
+	case reflect.String:
+		return EncodeString(v.(string))
+	default:
+		return ""
+	}
+}
+
+func EncodeString(s string) string {
+	return fmt.Sprintf("+%v\r\n", s)
 }

@@ -67,3 +67,14 @@ func TestArrayDecode(t *testing.T) {
 		}
 	}
 }
+
+func TestSimpleStringEncode(t *testing.T) {
+	cases := map[string]string{
+		"OK": "+OK\r\n",
+	}
+	for k, v := range cases {
+		if core.Encode(k) != v {
+			t.Fail()
+		}
+	}
+}
