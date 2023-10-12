@@ -10,8 +10,8 @@ import (
 	"github.com/subrag/kv-store/core"
 )
 
-// gracefull close of kv-store and connected client on keyboard interruption
-func gracefullShutdown(listen net.Listener) {
+// graceful close of kv-store and connected client on keyboard interruption.
+func gracefulShutdown(listen net.Listener) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	<-c // wait block
@@ -19,18 +19,11 @@ func gracefullShutdown(listen net.Listener) {
 	listen.Close()
 }
 
-// serve cli client
+// serve cli client.
 func handleRequest(conn net.Conn, client int, db *core.KV) {
-	// var buf []byte = make([]byte, 512)
-	// n, err := conn.Read(buf[:])
-	// if err != nil {
-	// 	log.Printf("error: %v\n", err)
-	// 	return
-	// }
-	// writeResponse(conn, string(buf[:n]))
 	for {
-		var buf []byte = make([]byte, 512)
-		n, err := conn.Read(buf[:])
+		var buf = make([]byte, 512)
+		n, err := conn.Read(buf)
 		if err != nil {
 			log.Printf("error: %v\n", err)
 			return
@@ -42,7 +35,10 @@ func handleRequest(conn net.Conn, client int, db *core.KV) {
 		if err != nil {
 			log.Printf("%v\n", err)
 		}
-		writeResponse(conn, val)
+		err = writeResponse(conn, val)
+		if err != nil {
+			fmt.Printf("error while writing response clinet [%v]", client)
+		}
 	}
 }
 

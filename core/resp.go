@@ -16,7 +16,6 @@ func Decode(data []byte) (interface{}, error) {
 	}
 	value, _, err := DecodeOne(data)
 	return value, err
-
 }
 
 func DecodeOne(data []byte) (interface{}, int, error) {
@@ -40,7 +39,8 @@ func DecodeOne(data []byte) (interface{}, int, error) {
 
 func readSimpleString(data []byte) (string, int, error) {
 	pos := 1
-	for ; data[pos] != '\r'; pos++ {
+	for data[pos] != '\r' {
+		pos++
 	}
 	return string(data[1:pos]), pos + 2, nil
 }
@@ -51,7 +51,7 @@ func readError(data []byte) (string, int, error) {
 
 func readInt64(data []byte) (int64, int, error) {
 	pos := 1
-	var value int64 = 0
+	var value int64
 	for ; data[pos] != '\r'; pos++ {
 		value = value*10 + int64(data[pos]-'0')
 	}
@@ -76,15 +76,15 @@ func readBulkString(data []byte) (string, int, error) {
 
 	// reading the length and forwarding the pos by
 	// the lenth of the integer + the first special character
-	len, delta := readLength(data[pos:])
+	totalChar, delta := readLength(data[pos:])
 	pos += delta
 
 	// reading `len` bytes as string
-	return string(data[pos:(pos + len)]), pos + len + 2, nil
+	return string(data[pos:(pos + totalChar)]), pos + totalChar + 2, nil
 }
 
 // reads a RESP encoded array from data and returns
-// the array, the delta, and the error
+// the array, the delta, and the error.
 func readArray(data []byte) (interface{}, int, error) {
 	// first character *
 	pos := 1
@@ -93,7 +93,7 @@ func readArray(data []byte) (interface{}, int, error) {
 	count, delta := readLength(data[pos:])
 	pos += delta
 
-	var elems []interface{} = make([]interface{}, count)
+	var elems = make([]interface{}, count)
 	for i := range elems {
 		elem, delta, err := DecodeOne(data[pos:])
 		if err != nil {
