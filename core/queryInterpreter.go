@@ -42,6 +42,8 @@ func HandlerQuery(b []byte, db *DB) (string, error) {
 		return setQueryHandler(command.args, db)
 	case "GET":
 		return getQueryHandler(command.args, db)
+	case "DEL":
+		return delQueryHandler(command.args, db)
 	default:
 		return "-\r\n", fmt.Errorf("unknown command %v", command)
 	}
@@ -52,9 +54,7 @@ func setQueryHandler(args []string, db *DB) (string, error) {
 		db.set(args[0], args[1], DEFAULT_TTL)
 		return EncodeString("OK"), nil
 	}
-	if len(args) == 4 && strings.ToUpper(args[3]) == "EX" {
-		// Set db ttl using expiry prefix
-		// ToDo: optimize tis solution
+	if len(args) == 4 && strings.ToUpper(args[2]) == "EX" {
 		ttl, err := strconv.Atoi(args[3])
 		if err != nil {
 			return "-\r\n", fmt.Errorf("unable to process command, error: %v", err.Error())
@@ -68,4 +68,16 @@ func setQueryHandler(args []string, db *DB) (string, error) {
 func getQueryHandler(args []string, db *DB) (string, error) {
 	v := db.get(args[0])
 	return EncodeString(v), nil
+}
+
+// ToDo: param args needs to be refactored
+func delQueryHandler(args []string, db *DB) (string, error) {
+	ct := 0
+	for _, k := range args {
+		// count only if key exists and deleted by del method
+		if db.del(k) != "" {
+			ct++
+		}
+	}
+	return EncodeInt(ct), nil
 }

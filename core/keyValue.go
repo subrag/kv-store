@@ -10,21 +10,42 @@ type Item struct {
 
 type KV map[string]Item
 
+// ToDo: callback channel for evicted values
 type DB struct {
 	KV KV
 }
 
-func (db DB) set(a string, b string, ttl int32) {
+func (db DB) set(key string, val string, ttl int32) {
+	// convert ttl to sec
 	exp := time.Now().Add(time.Second * time.Duration(ttl))
-	db.KV[a] = Item{val: b, expiry: exp}
+	db.KV[key] = Item{val: val, expiry: exp}
 }
-func (db DB) get(a string) string {
-	return db.KV[a].val
-}
-
-func (db DB) evict() {
+func (db DB) get(key string) string {
+	return db.KV[key].val
 }
 
-// func (db DB)
+func (db DB) del(key string) string {
+	tmp := db.get(key)
+	delete(db.KV, key)
+	return tmp
+}
+
 // ToDo: solve race condition - mutex
 // ToDo: minHeap for evict
+func (db DB) evict() {
+	now := time.Now().UnixMicro()
+	for k, v := range db.KV {
+		if v.expiry.UnixMicro() < now {
+			db.del(k)
+		}
+	}
+}
+
+func (db DB) ScheduledEvict() {
+	ticker := time.NewTicker(TICKET_FREQENCY * time.Second)
+	for {
+		// ToDo: Use select to graceful shutdown of scheduledEvict
+		<-ticker.C
+		db.evict()
+	}
+}

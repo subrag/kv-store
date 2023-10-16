@@ -117,3 +117,8 @@ func Encode(v interface{}) string {
 func EncodeString(s string) string {
 	return fmt.Sprintf("+%v\r\n", s)
 }
+
+func EncodeInt(val int) string {
+	// ToDo: handle -ve numbers
+	return fmt.Sprintf(":%v\r\n", val)
+}
