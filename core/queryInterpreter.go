@@ -45,24 +45,24 @@ func HandlerQuery(b []byte, db *DB) (string, error) {
 	case "DEL":
 		return delQueryHandler(command.args, db)
 	default:
-		return "-\r\n", fmt.Errorf("unknown command %v", command)
+		return RespErrUnknownCmc, fmt.Errorf("unknown command %v", command)
 	}
 }
 
 func setQueryHandler(args []string, db *DB) (string, error) {
 	if len(args) == 2 {
-		db.set(args[0], args[1], DEFAULT_TTL)
+		db.set(args[0], args[1], DefaultTTL)
 		return EncodeString("OK"), nil
 	}
 	if len(args) == 4 && strings.ToUpper(args[2]) == "EX" {
 		ttl, err := strconv.Atoi(args[3])
 		if err != nil {
-			return "-\r\n", fmt.Errorf("unable to process command, error: %v", err.Error())
+			return RespErrUnknownCmc, fmt.Errorf("unable to process command, error: %v", err.Error())
 		}
 		db.set(args[0], args[1], int32(ttl))
 		return EncodeString("OK"), nil
 	}
-	return "-\r\n", fmt.Errorf("unable to process command")
+	return RespErrUnknownCmc, fmt.Errorf("unable to process command")
 }
 
 func getQueryHandler(args []string, db *DB) (string, error) {
@@ -70,7 +70,7 @@ func getQueryHandler(args []string, db *DB) (string, error) {
 	return EncodeString(v), nil
 }
 
-// ToDo: param args needs to be refactored
+// ToDo: param args needs to be refactored.
 func delQueryHandler(args []string, db *DB) (string, error) {
 	ct := 0
 	for _, k := range args {

@@ -10,7 +10,7 @@ type Item struct {
 
 type KV map[string]Item
 
-// ToDo: callback channel for evicted values
+// ToDo: callback channel for evicted values.
 type DB struct {
 	KV KV
 }
@@ -31,7 +31,7 @@ func (db DB) del(key string) string {
 }
 
 // ToDo: solve race condition - mutex
-// ToDo: minHeap for evict
+// ToDo: minHeap for evict.
 func (db DB) evict() {
 	now := time.Now().UnixMicro()
 	for k, v := range db.KV {
@@ -42,7 +42,7 @@ func (db DB) evict() {
 }
 
 func (db DB) ScheduledEvict() {
-	ticker := time.NewTicker(TICKET_FREQENCY * time.Second)
+	ticker := time.NewTicker(TickerFrequency * time.Second)
 	for {
 		// ToDo: Use select to graceful shutdown of scheduledEvict
 		<-ticker.C
