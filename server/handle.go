@@ -20,7 +20,7 @@ func gracefulShutdown(listen net.Listener) {
 }
 
 // serve cli client.
-func handleRequest(conn net.Conn, client int, db *core.KV) {
+func handleRequest(conn net.Conn, client int, db *core.DB) {
 	for {
 		var buf = make([]byte, 512)
 		n, err := conn.Read(buf)

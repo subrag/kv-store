@@ -30,7 +30,7 @@ func gracefulCloseServerfd(serverFD int) {
 }
 
 // create async server using epoll.
-func AyncServer(db *core.KV) {
+func AyncServer(db *core.DB) {
 	const maxClients = 20000
 
 	var event syscall.EpollEvent

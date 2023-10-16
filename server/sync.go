@@ -19,8 +19,8 @@ func Server() {
 	}
 	fmt.Printf("kv-store running: %v\n", Addr)
 
-	db := core.KV{}
-	db["a"] = "a"
+	db := core.DB{}
+	db.KV["a"] = core.Item{}
 	client := 0
 	go gracefulShutdown(listen)
 

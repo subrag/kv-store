@@ -1,10 +1,30 @@
 package core
 
-type KV map[string]string
+import "time"
 
-func (kv KV) set(a, b string) {
-	kv[a] = b
+// assumption: all values stored as string.
+type Item struct {
+	val    string
+	expiry time.Time
 }
-func (kv KV) get(a string) string {
-	return kv[a]
+
+type KV map[string]Item
+
+type DB struct {
+	KV KV
 }
+
+func (db DB) set(a string, b string, ttl int32) {
+	exp := time.Now().Add(time.Second * time.Duration(ttl))
+	db.KV[a] = Item{val: b, expiry: exp}
+}
+func (db DB) get(a string) string {
+	return db.KV[a].val
+}
+
+func (db DB) evict() {
+}
+
+// func (db DB)
+// ToDo: solve race condition - mutex
+// ToDo: minHeap for evict

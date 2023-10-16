@@ -7,6 +7,6 @@ import (
 
 func main() {
 	// server.Server()
-	db := core.KV{}
+	db := core.DB{KV: core.KV{}}
 	server.AyncServer(&db)
 }

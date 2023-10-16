@@ -3,15 +3,16 @@ package core
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
-type CmdArgs struct {
+type Command struct {
 	cmd  string
 	args []string
 }
 
-func convertToCmdArgs(rawDecodedCmd interface{}) CmdArgs {
+func convertToCmdArgs(rawDecodedCmd interface{}) Command {
 	arr := rawDecodedCmd.([]interface{})
 	res := make([]string, len(arr))
 	for i, v := range arr {
@@ -22,31 +23,49 @@ func convertToCmdArgs(rawDecodedCmd interface{}) CmdArgs {
 			res[i] = "---"
 		}
 	}
-	return CmdArgs{cmd: strings.ToUpper(res[0]), args: res[1:]}
+	return Command{cmd: strings.ToUpper(res[0]), args: res[1:]}
 }
 
-func HandlerQuery(b []byte, db *KV) (string, error) {
-	command, _ := Decode(b)
-	if command == nil {
+func HandlerQuery(b []byte, db *DB) (string, error) {
+	commandStr, _ := Decode(b)
+	if commandStr == nil {
 		return "", errors.New("no data")
 	}
-	cmdArgs := convertToCmdArgs(command)
+	command := convertToCmdArgs(commandStr)
 
-	switch cmdArgs.cmd {
+	switch command.cmd {
 	case "PING":
 		return EncodeString("PONG"), nil
 	case "COMMAND":
 		return EncodeString(""), nil
 	case "SET":
-		if len(cmdArgs.args) != 2 {
-			return "-\r\n", fmt.Errorf("unable to process command %v", command)
-		}
-		db.set(cmdArgs.args[0], cmdArgs.args[1])
-		return EncodeString("OK"), nil
+		return setQueryHandler(command.args, db)
 	case "GET":
-		v := db.get(cmdArgs.args[0])
-		return EncodeString(v), nil
+		return getQueryHandler(command.args, db)
 	default:
 		return "-\r\n", fmt.Errorf("unknown command %v", command)
 	}
+}
+
+func setQueryHandler(args []string, db *DB) (string, error) {
+	if len(args) == 2 {
+		db.set(args[0], args[1], DEFAULT_TTL)
+		return EncodeString("OK"), nil
+	}
+	if len(args) == 4 && strings.ToUpper(args[3]) == "EX" {
+		// Set db ttl using expiry prefix
+		// ToDo: optimize tis solution
+		ttl, err := strconv.Atoi(args[3])
+		if err != nil {
+			return "-\r\n", fmt.Errorf("unable to process command, error: %v", err.Error())
+		}
+		db.set(args[0], args[1], int32(ttl))
+		return EncodeString("OK"), nil
+	}
+	return "-\r\n", fmt.Errorf("unable to process command")
+}
+
+func getQueryHandler(args []string, db *DB) (string, error) {
+	v := db.get(args[0])
+	return EncodeString(v), nil
 }
