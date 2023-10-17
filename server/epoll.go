@@ -26,7 +26,7 @@ func gracefulCloseServerfd(serverFD int) {
 	<-c // wait block
 	log.Println("process interrupted exiting...")
 	syscall.Close(serverFD)
-	// os.Exit(1)
+	os.Exit(1)
 }
 
 // create async server using epoll.

@@ -1,6 +1,11 @@
 package core
 
-import "time"
+import (
+	"log"
+	"os"
+	"os/signal"
+	"time"
+)
 
 // assumption: all values stored as string.
 type Item struct {
@@ -43,9 +48,15 @@ func (db DB) evict() {
 
 func (db DB) ScheduledEvict() {
 	ticker := time.NewTicker(TickerFrequency * time.Second)
+	shutDown := make(chan os.Signal, 1)
+	signal.Notify(shutDown, os.Interrupt)
 	for {
-		// ToDo: Use select to graceful shutdown of scheduledEvict
-		<-ticker.C
-		db.evict()
+		select {
+		case <-ticker.C:
+			db.evict()
+		case <-shutDown:
+			log.Println("closing the scheduled evict on os interrupt")
+			os.Exit(1)
+		}
 	}
 }
