@@ -9,9 +9,9 @@ import (
 	"github.com/subrag/kv-store/core"
 )
 
-func Server() {
+func Server(Port int) {
 	// Server spinsup n goroutines for n tcp requests.
-	Addr := fmt.Sprintf("%v:%v", config.Host, config.Port)
+	Addr := fmt.Sprintf("%v:%v", config.Host, Port)
 
 	listen, err := net.Listen("tcp", Addr)
 	if err != nil {

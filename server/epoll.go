@@ -30,7 +30,7 @@ func gracefulCloseServerfd(serverFD int) {
 }
 
 // create async server using epoll.
-func AyncServer(db *core.DB) {
+func AyncServer(db *core.DB, Port int) {
 	const maxClients = 20000
 
 	var event syscall.EpollEvent
@@ -52,11 +52,11 @@ func AyncServer(db *core.DB) {
 		return
 	}
 
-	addr := syscall.SockaddrInet4{Port: config.Port}
+	addr := syscall.SockaddrInet4{Port: Port}
 	copy(addr.Addr[:], net.ParseIP(config.Host).To4())
 
 	if err = syscall.Bind(serverFD, &addr); err != nil {
-		log.Printf("unable to bind %v:%v, %s", config.Host, config.Port, err.Error())
+		log.Printf("unable to bind %v:%v, %s", config.Host, Port, err.Error())
 		return
 	}
 
@@ -79,7 +79,7 @@ func AyncServer(db *core.DB) {
 		log.Println("epoll_ctl: ", e)
 		return
 	}
-	fmt.Printf("kv-store running %v:%v\n", config.Host, config.Port)
+	fmt.Printf("kv-store running %v:%v\n", config.Host, Port)
 
 	for {
 		nevents, e := syscall.EpollWait(epfd, events[:], -1)
