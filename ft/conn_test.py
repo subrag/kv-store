@@ -11,6 +11,8 @@ async def call_redis(i:int):
 
 
 async def main():
+    r = redis.Redis(host="localhost", port=6379)
+    r.set("A", 10)
     st = time.time()
     task_list = []
     for i in range(21):

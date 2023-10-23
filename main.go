@@ -9,9 +9,10 @@ import (
 
 func main() {
 	var Port int
-	// server.Server()
 	db := core.DB{KV: core.KV{}}
 	go db.ScheduledEvict()
-	flag.IntVar(&Port, "p", 9089, "Specify the port to run kv-store")
+	flag.IntVar(&Port, "p", 8987, "Specify the port to run kv-store")
+	flag.Parse()
+	// server.Server(Port)
 	server.AyncServer(&db, Port)
 }
