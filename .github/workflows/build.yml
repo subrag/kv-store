@@ -1,0 +1,27 @@
+name: Build and Commit
+
+on:
+  push:
+    branches:
+      - main  # Replace with your branch name
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build
+      run: |
+        echo "Building"
+        go build -o kv-store
+
+    - name: Commit and Push
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .            # Add all changes, including build files
+        git commit -m "Add build files"  # Commit message
+        git push
