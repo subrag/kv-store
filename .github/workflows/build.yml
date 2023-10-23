@@ -1,17 +1,22 @@
 name: Build and Commit
 
 on:
-  push:
-    branches:
-      - main  # Replace with your branch name
+  workflow_run:
+    workflows: ["Run CI"]
+    types:
+      - completed
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+    - uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+        cache: false
 
     - name: Build
       run: |
@@ -20,8 +25,8 @@ jobs:
 
     - name: Commit and Push
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
+        git config --local user.email "subrag25@gmail.com"
+        git config --local user.name "subrag"
         git add .            # Add all changes, including build files
         git commit -m "Add build files"  # Commit message
         git push
