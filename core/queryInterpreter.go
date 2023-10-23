@@ -51,7 +51,7 @@ func HandlerQuery(b []byte, db *DB) (string, error) {
 
 func setQueryHandler(args []string, db *DB) (string, error) {
 	if len(args) == 2 {
-		db.set(args[0], args[1], DefaultTTL)
+		db.Set(args[0], args[1], DefaultTTL)
 		return EncodeString("OK"), nil
 	}
 	if len(args) == 4 && strings.ToUpper(args[2]) == "EX" {
@@ -59,14 +59,14 @@ func setQueryHandler(args []string, db *DB) (string, error) {
 		if err != nil {
 			return RespErrUnknownCmc, fmt.Errorf("unable to process command, error: %v", err.Error())
 		}
-		db.set(args[0], args[1], int32(ttl))
+		db.Set(args[0], args[1], int32(ttl))
 		return EncodeString("OK"), nil
 	}
 	return RespErrUnknownCmc, fmt.Errorf("unable to process command")
 }
 
 func getQueryHandler(args []string, db *DB) (string, error) {
-	v := db.get(args[0])
+	v := db.Get(args[0])
 	return EncodeString(v), nil
 }
 
@@ -75,7 +75,7 @@ func delQueryHandler(args []string, db *DB) (string, error) {
 	ct := 0
 	for _, k := range args {
 		// count only if key exists and deleted by del method
-		if db.del(k) != "" {
+		if db.Del(k) != "" {
 			ct++
 		}
 	}
